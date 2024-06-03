@@ -1,9 +1,10 @@
 import boto3
+
 ### 지워야하는 리소스 키워드###
-keyword = "glen-remove-test"
+keyword = "TARGET KEYWORD"
 
 ### 대상 리전 지정 ###
-region_name='ap-northeast-2'
+region_name='TARGET REGION'
 
 def delete_wsu_resume_codebuild_projects():
     # 서울 리전 세션 생성
