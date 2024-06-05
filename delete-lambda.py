@@ -1,9 +1,10 @@
 import boto3
-### 지워야하는 리소스 키워드###
-keyword = "TARGET KEYWORD"
+
+### 지워야하는 리소스 키워드 ###
+keyword = "wsu-resume"
 
 ### 대상 리전 지정 ###
-region_name='TARGET REGION'
+region_name = 'ap-northeast-2'
 
 def delete_lambda_functions(keyword):
     # 서울 리전 세션 생성
@@ -15,17 +16,30 @@ def delete_lambda_functions(keyword):
     # Lambda 함수 목록 가져오기
     response = lambda_client.list_functions()
     
-    print("START")
+    print("시작\n\n\n")
     # 이름에 키워드가 포함된 함수 찾기
-    for function in response.get('Functions', []):
-        function_name = function['FunctionName']
-        if keyword in function_name.lower():  # 소문자로 변환하여 비교
-            print(f"\n\n\nFound Lambda Function: {function_name}")
-            confirmation = input(f"\n\n\nDo you want to delete Lambda Function '{function_name}'? (y/n): ").strip().lower()
-            if confirmation == 'y':
-                print(f"\n\n\nDeleting Lambda Function: {function_name}")
+    functions_to_delete = [function['FunctionName'] for function in response.get('Functions', []) if keyword in function['FunctionName'].lower()]
+    
+    if functions_to_delete:
+        print("찾은 Lambda 함수 목록:")
+        for function_name in functions_to_delete:
+            print(f"- {function_name}")
+        
+        confirmation = input("이 모든 Lambda 함수를 삭제하시겠습니까? (y/n): ").strip().lower()
+        if confirmation == 'y':
+            for function_name in functions_to_delete:
+                print(f"\n\nLambda 함수 삭제 중: {function_name}")
                 lambda_client.delete_function(FunctionName=function_name)
-    print("\n\n\nEND")
+        else:
+            for function_name in functions_to_delete:
+                confirmation = input(f"Lambda 함수 '{function_name}'을(를) 삭제하시겠습니까? (y/n): ").strip().lower()
+                if confirmation == 'y':
+                    print(f"\n\nLambda 함수 삭제 중: {function_name}")
+                    lambda_client.delete_function(FunctionName=function_name)
+    else:
+        print("지정된 키워드가 포함된 함수를 찾을 수 없습니다.")
+    
+    print("\n\n\n종료")
 
 if __name__ == '__main__':
     delete_lambda_functions(keyword)
